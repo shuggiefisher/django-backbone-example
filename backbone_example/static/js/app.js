@@ -51,7 +51,8 @@
         className: 'tweet',
 
         events: {
-            'click .permalink': 'navigate'           
+            'click .permalink': 'navigate',
+            'click .destroy': 'clear'
         },
 
         initialize: function(){
@@ -61,6 +62,10 @@
         navigate: function(e){
             this.trigger('navigate', this.model);
             e.preventDefault();
+        },
+
+        clear: function() {
+            this.model.destroy();
         },
 
         render: function(){
@@ -114,10 +119,11 @@
 
     window.ListView = Backbone.View.extend({
         initialize: function(){
-            _.bindAll(this, 'addOne', 'addAll');
+            _.bindAll(this, 'addOne', 'addAll', 'deleteOne');
 
             this.collection.bind('add', this.addOne);
             this.collection.bind('reset', this.addAll, this);
+            this.collection.bind('remove', this.deleteOne, this);
             this.views = [];
         },
 
@@ -133,6 +139,11 @@
             $(this.el).prepend(view.render().el);
             this.views.push(view);
             view.bind('all', this.rethrow, this);
+        },
+
+        deleteOne: function(tweet) {
+            view = this.views.pop(_.find(this.views, function(view) {return view.model.id == tweet.id;}));
+            $(view.el).remove();
         },
 
         rethrow: function(){
