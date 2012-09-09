@@ -35,6 +35,10 @@ body {
   margin: .25em 0;
 }
 
+input.edit {
+    display: none;
+}
+
 h2 {
   font-size: 1.5em;
   font-weight: bold;
@@ -52,6 +56,31 @@ h2 {
   border: 1px solid #ccc;
   border-top: 1px solid #fff;
   padding: .5em;
+}
+
+#app li.editing {
+	border-bottom: none;
+	padding: 0;
+}
+
+#app li.editing .edit {
+	display: block;
+	width: 506px;
+	padding: 13px 17px 12px 17px;
+	margin: 0 0 0 43px;
+}
+
+#app li.editing .view {
+	display: none;
+}
+
+#app input.edit::-webkit-input-placeholder {
+	font-style: italic;
+}
+
+#app input.edit:-moz-placeholder {
+	font-style: italic;
+	color: #a9a9a9;
 }
 
 .username {

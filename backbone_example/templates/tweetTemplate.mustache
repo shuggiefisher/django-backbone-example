@@ -1,5 +1,8 @@
-<p class="message">{{ message }}</p>
-<abbr class="timestamp">
-  <a class="permalink" href="/{{id}}/">{{ timestamp }}</a>
-</abbr>
-<button class="destroy btn">Delete</button>
+<div class="view">
+    <p class="message">{{ message }}</p>
+    <abbr class="timestamp">
+        <a class="permalink" href="/{{id}}/">{{ timestamp }}</a>
+    </abbr>
+    <button class="destroy btn">Delete</button>
+</div>
+<input class="edit" value="{{ message }}">

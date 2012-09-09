@@ -1,3 +1,5 @@
+var ENTER_KEY = 13;
+
 (function(){
     window.Tweet = Backbone.Model.extend({
         urlRoot: TWEET_API
@@ -52,7 +54,10 @@
 
         events: {
             'click .permalink': 'navigate',
-            'click .destroy': 'clear'
+            'click .destroy': 'clear',
+            'dblclick .message': 'edit',
+            'keypress .edit':	'updateOnEnter',
+            'blur .edit':		'close'
         },
 
         initialize: function(){
@@ -68,8 +73,32 @@
             this.model.destroy();
         },
 
+        edit: function() {
+            $(this.el).addClass('editing');
+            this.$('.edit').focus();
+        },
+
+        updateOnEnter: function( e ) {
+			if ( e.which === ENTER_KEY ) {
+				this.close();
+			}
+		},
+
+        close: function() {
+			var value = this.input.val().trim();
+
+			if ( value ) {
+				this.model.save({ message: value });
+			} else {
+				this.clear();
+			}
+
+			$(this.el).removeClass('editing');
+		},
+
         render: function(){
             $(this.el).html(ich.tweetTemplate(this.model.toJSON()));
+            this.input = this.$('.edit');
             return this;
         }                                        
     });
