@@ -7,7 +7,7 @@ var ENTER_KEY = 13;
 
     window.Tweets = Backbone.Collection.extend({
         urlRoot: TWEET_API,
-        model: Tweet, 
+        model: Tweet,
 
         maybeFetch: function(options){
             // Helper function to fetch only if this collection has not been fetched before.
@@ -44,7 +44,7 @@ var ENTER_KEY = 13;
 
             model.fetch(options);
         }
-        
+
 
     });
 
@@ -100,7 +100,7 @@ var ENTER_KEY = 13;
             $(this.el).html(ich.tweetTemplate(this.model.toJSON()));
             this.input = this.$('.edit');
             return this;
-        }                                        
+        }
     });
 
 
@@ -108,7 +108,7 @@ var ENTER_KEY = 13;
         events: {
             'click .home': 'home'
         },
-        
+
         home: function(e){
             this.trigger('home');
             e.preventDefault();
@@ -117,7 +117,7 @@ var ENTER_KEY = 13;
         render: function(){
             $(this.el).html(ich.detailApp(this.model.toJSON()));
             return this;
-        }                                        
+        }
     });
 
     window.InputView = Backbone.View.extend({
@@ -200,10 +200,10 @@ var ENTER_KEY = 13;
                 collection: this.collection,
                 el: this.$('#input')
             });
-        }        
+        }
     });
 
-    
+
     window.Router = Backbone.Router.extend({
         routes: {
             '': 'list',
@@ -233,14 +233,14 @@ var ENTER_KEY = 13;
         });
         app.router.bind('route:list', function(){
             app.tweets.maybeFetch({
-                success: _.bind(app.list.render, app.list)                
+                success: _.bind(app.list.render, app.list)
             });
         });
         app.router.bind('route:detail', function(id){
             app.tweets.getOrFetch(app.tweets.urlRoot + id + '/', {
                 success: function(model){
                     app.detail.model = model;
-                    app.detail.render();                    
+                    app.detail.render();
                 }
             });
         });
@@ -248,7 +248,7 @@ var ENTER_KEY = 13;
         app.list.bind('navigate', app.router.navigate_to, app.router);
         app.detail.bind('home', app.router.navigate_to, app.router);
         Backbone.history.start({
-            pushState: true, 
+            pushState: true,
             silent: app.loaded
         });
     });
