@@ -2,6 +2,7 @@ from django.db import models
 from guardian.shortcuts import assign
 from django.contrib.auth.models import Group
 
+
 class Tweet(models.Model):
     message = models.CharField(max_length=140)
     timestamp = models.DateTimeField(auto_now_add=True)

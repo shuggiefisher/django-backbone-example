@@ -1,15 +1,18 @@
 from django.contrib.auth.models import Group
 
 from tastypie.resources import ModelResource
+from tastypie import fields
 from tastypie.authorization import Authorization
 from guardian.shortcuts import get_objects_for_user, get_objects_for_group
 
 from tweets.models import Tweet
+from base.api.resources import UserRelatedResource
 
 everyone = Group.objects.get(name='Everyone')
 
 
 class TweetResource(ModelResource):
+    # created_by = fields.ForeignKey(UserRelatedResource, 'created_by', null=True)
 
     def __init__(self, **kwargs):
         super(TweetResource, self).__init__(**kwargs)
@@ -53,6 +56,7 @@ class TweetResource(ModelResource):
     class Meta:
         queryset = Tweet.objects.all()  # this is ignored by get_object_list() above
         authorization = Authorization()
-        read_only_fields = ['created_by', 'timestamp']
+        read_only_fields = ['timestamp']  # ['created_by', 'timestamp']
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'delete', 'put']
+        resource_name = 'tweet'
