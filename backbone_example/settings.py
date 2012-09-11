@@ -84,8 +84,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-    'tweets',
+
     'guardian',
+    'django_extensions',
+
+    'base',
+    'tweets'
 )
 
 AUTHENTICATION_BACKENDS = (

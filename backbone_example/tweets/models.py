@@ -1,6 +1,6 @@
 from django.db import models
 from guardian.shortcuts import assign
-from django.contirb.auth.models import Group
+from django.contrib.auth.models import Group
 
 class Tweet(models.Model):
     message = models.CharField(max_length=140)
@@ -15,7 +15,7 @@ class Tweet(models.Model):
             ('admin_element', 'Is admin of element'),
         )
 
-    def save(*args, **kwargs):
+    def save(self, *args, **kwargs):
         if self.pk is None:
             created = True
         else:
