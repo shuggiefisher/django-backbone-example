@@ -22,7 +22,7 @@ class Tweet(models.Model):
             created = False
 
         # pre_save
-            
+
         super(Tweet, self).save(*args, **kwargs)
 
         # post_save
@@ -33,4 +33,6 @@ class Tweet(models.Model):
             assign('edit_element', everyone, self)
             if self.created_by is not None:
                 assign('admin_element', self.created_by, self)
+            else:
+                assign('admin_element', everyone, self)
 
