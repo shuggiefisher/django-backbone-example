@@ -3,30 +3,9 @@
     <abbr class="timestamp">
         <a class="permalink" href="/{{id}}/">{{ timestamp }}</a>
     </abbr>
-    <select multiple class="view_permissions">
-        {{#group_can_view}}
-            <option value="{{resource_uri}}">{{name}}</option>
-        {{/group_can_view}}
-        {{#can_view}}
-            <option value="{{resource_uri}}">{{name}}</option>
-        {{/can_view}}
-    </select>
-    <select multiple class="edit_permissions">
-        {{#group_can_edit}}
-            <option value="{{resource_uri}}">{{name}}</option>
-        {{/group_can_edit}}
-        {{#can_edit}}
-            <option value="{{resource_uri}}">{{name}}</option>
-        {{/can_edit}}
-    </select>
-    <select multiple class="admin_permissions">
-        {{#group_is_admin}}
-            <option value="{{resource_uri}}">{{name}}</option>
-        {{/group_is_admin}}
-        {{#is_admin}}
-            <option value="{{resource_uri}}">{{name}}</option>
-        {{/is_admin}}
-    </select>
+    {{{can_view_html}}}
+    {{{can_edit_html}}}
+    {{{is_admin_html}}}
     <button class="destroy btn">Delete</button>
 </div>
 <input class="edit" value="{{ message }}">

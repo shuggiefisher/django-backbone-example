@@ -1,4 +1,4 @@
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
@@ -14,6 +14,7 @@ from lazy import lazy
 from tweets.models import Tweet
 
 everyone = Group.objects.get(name='Everyone')
+anonymous_user = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
 
 
 class TweetResource(ModelResource):
@@ -48,26 +49,22 @@ class TweetResource(ModelResource):
         This is effectively doing the authorization, so it may result in incorrect
         HTTP status codes being produced
         """
+        if request.user.is_anonymous():
+            requesting_user = anonymous_user
+        else:
+            requesting_user = request.user
+
         if request and request.method in ('GET'):
             # can view
-            if request.user.is_authenticated() and request.user.is_active:
-                return get_objects_for_user(request.user, 'tweets.view_element', use_groups=True)
-            else:
-                return get_objects_for_group(everyone, 'tweets.view_element')
+            return get_objects_for_user(requesting_user, 'tweets.view_element', use_groups=True)
 
         elif request and request.method in ('DELETE'):
             # is_admin
-            if request.user.is_authenticated() and request.user.is_active:
-                return get_objects_for_user(request.user, 'tweets.admin_element', use_groups=True)
-            else:
-                return get_objects_for_group(everyone, 'tweets.admin_element')
+            return get_objects_for_user(requesting_user, 'tweets.admin_element', use_groups=True)
 
         elif request and request.method in ('PUT', 'PATCH'):
             # can edit
-            if request.user.is_authenticated() and request.user.is_active:
-                return get_objects_for_user(request.user, 'tweets.edit_element', use_groups=True)
-            else:
-                return get_objects_for_group(everyone, 'tweets.edit_element')
+            return get_objects_for_user(requesting_user, 'tweets.edit_element', use_groups=True)
 
     def dehydrate_can_view(self, bundle):
         return self.with_perm('view_element', bundle.obj, resource='user')
@@ -162,6 +159,10 @@ class TweetResource(ModelResource):
 
             for entity in entity_model.objects.filter(pk__in=entities_to_remove):
                 remove_perm(permission, entity, bundle.obj)
+                if resource_permission == 'is_admin':
+                    if set(current_entity_pks) - entities_to_remove == set():
+                        # if everyone else is removed, the original author should remain the admin
+                        entities_to_add |= set(obj.created_by.pk)
 
             for entity in entity_model.objects.filter(pk__in=entities_to_add):
                 assign(permission, entity, bundle.obj)

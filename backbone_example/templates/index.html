@@ -1,5 +1,6 @@
 {% load mustache %}
 {% load straight_include %}
+{% load verbatim %}
 
 <!doctype html>
 <html lang="en">
@@ -34,6 +35,15 @@
     <script type="text/html" id="detailApp">
       {% straight_include "detailApp.mustache" %}
     </script>
+
+    {% if users_and_groups %}
+    <script type="text/html" id="usersAndGroupsSelect">
+      <select multiple="multiple" class="perms{% verbatim %} {{perm}}{% endverbatim %}">
+        {% mustache "usersAndGroupsSelect" users_and_groups %}
+      </select>
+    </script>
+    {% endif %}
+
   </head>
 
   <body>

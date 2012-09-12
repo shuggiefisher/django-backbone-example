@@ -90,3 +90,7 @@ h2 {
 .timestamp {
   font-size: .75em;
 }
+
+select {
+    font-size: 11px;
+}

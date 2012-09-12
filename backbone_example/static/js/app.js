@@ -101,8 +101,28 @@ var ENTER_KEY = 13;
             
         },
 
+        renderPermSelect: function(perm, users, groups) {
+            var $select = $(ich.usersAndGroupsSelect({perm: perm}));
+            var perms = users.concat(groups)
+            var resources = _.map(perms, function(entity) { return entity.resource_uri; });
+            _.each(resources, function(resource) {
+                $select.find('option[value="' + resource + '"]').attr('selected', 'selected');
+            });
+            return $select[0].outerHTML;
+        },
+
+        renderPerms: function(model) {
+            var permSelects = {};
+            _.each(['can_view', 'can_edit', 'is_admin'], function(perm){
+                permSelects[perm + '_html'] = this.renderPermSelect(perm, this.model.attributes[perm], this.model.attributes['group_' + perm]);
+            }, this);
+            return permSelects;
+        },
+
         render: function(){
-            $(this.el).html(ich.tweetTemplate(this.model.toJSON()));
+            var selectHTML = this.renderPerms(this.model);
+            var data = _.extend(this.model.toJSON(), selectHTML);
+            $(this.el).html(ich.tweetTemplate(data));
             this.input = this.$('.edit');
             return this;
         }
