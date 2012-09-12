@@ -56,8 +56,9 @@ var ENTER_KEY = 13;
             'click .permalink': 'navigate',
             'click .destroy': 'clear',
             'dblclick .message': 'edit',
-            'keypress .edit':	'updateOnEnter',
-            'blur .edit':		'close'
+            'keypress .edit': 'updateOnEnter',
+            'blur .edit': 'close',
+            'change select': 'updatePerms'
         },
 
         initialize: function(){
@@ -95,6 +96,10 @@ var ENTER_KEY = 13;
 
 			$(this.el).removeClass('editing');
 		},
+
+        updatePerms: function() {
+            
+        },
 
         render: function(){
             $(this.el).html(ich.tweetTemplate(this.model.toJSON()));

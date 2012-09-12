@@ -5,7 +5,10 @@ from django.conf import settings
 from tastypie.resources import ModelResource
 from tastypie import fields
 from tastypie.authorization import Authorization
-from guardian.shortcuts import get_objects_for_user, get_objects_for_group, get_users_with_perms, get_groups_with_perms
+from tastypie import http
+from tastypie.exceptions import ImmediateHttpResponse
+from guardian.shortcuts import get_objects_for_user, get_objects_for_group, \
+    get_users_with_perms, get_groups_with_perms, remove_perm, assign
 from lazy import lazy
 
 from tweets.models import Tweet
@@ -15,12 +18,12 @@ everyone = Group.objects.get(name='Everyone')
 
 class TweetResource(ModelResource):
     # created_by = fields.ForeignKey(UserRelatedResource, 'created_by', null=True)
-    can_view = fields.ListField(readonly=True)
-    can_edit = fields.ListField(readonly=True)
-    is_admin = fields.ListField(readonly=True)
-    group_can_view = fields.ListField(readonly=True)
-    group_can_edit = fields.ListField(readonly=True)
-    group_is_admin = fields.ListField(readonly=True)
+    can_view = fields.ListField(readonly=True, blank=True)
+    can_edit = fields.ListField(readonly=True, blank=True)
+    is_admin = fields.ListField(readonly=True, blank=True)
+    group_can_view = fields.ListField(readonly=True, blank=True)
+    group_can_edit = fields.ListField(readonly=True, blank=True)
+    group_is_admin = fields.ListField(readonly=True, blank=True)
 
     def __init__(self, **kwargs):
         super(TweetResource, self).__init__(**kwargs)
@@ -34,6 +37,11 @@ class TweetResource(ModelResource):
             user_pk = None
         bundle.data['created_by'] = {'pk': user_pk}
         return super(TweetResource, self).obj_create(bundle, request, **kwargs)
+
+    def obj_update(self, bundle, request, **kwargs):
+        bundle = super(TweetResource, self).obj_update(bundle, request, **kwargs)
+        self.update_permissions(bundle, request.user)
+        return bundle
 
     def get_object_list(self, request):
         """
@@ -108,6 +116,52 @@ class TweetResource(ModelResource):
                                       'pk': entity.pk,
                                       'resource_name': resource}
                 )
-                entity_uris.append(uri)
+                if resource == 'group':
+                    entity_name = entity.name
+                else:
+                    entity_name = entity.username
+                    
+                entity_uris.append({'name': entity_name,
+                                    'resource_uri': uri
+                })
 
         return entity_uris
+
+    def update_permissions(self, bundle, editing_user):
+        if editing_user.has_perm('tweets.admin_element', bundle.obj) is False:
+            return
+            # bundle has already been saved, so no point in raising an error
+#            raise ImmediateHttpResponse(response=http.HttpUnauthorized('Only admins of an element can change the permissions'))
+
+        self._update_user_permissions(bundle)
+        self._update_group_permissions(bundle)
+
+    def _update_group_permissions(self, bundle):
+        groups_with_perms = self._groups_with_perms(bundle.obj)
+        resource_permissions = ['group_can_view', 'group_can_edit', 'group_is_admin']
+        self._update_perms(bundle, groups_with_perms, resource_permissions, Group)
+
+    def _update_user_permissions(self, bundle):
+        users_with_perms = self._users_with_perms(bundle.obj)
+        resource_permissions = ['can_view', 'can_edit', 'is_admin']
+        self._update_perms(bundle, users_with_perms, resource_permissions, User)
+
+    def _update_perms(self, bundle, entities_with_perms, resource_permissions, entity_model):
+        permissions = ['can_view', 'can_edit', 'is_admin']
+        for permission, resource_permission in zip(permissions, resource_permissions):
+
+            perm_pairs = bundle.data[resource_permission]  # get data for this permission from bundle
+            perm_uris = [perm_pair['resource_uri'] for perm_pair in perm_pairs]  # get the resource_uris
+            new_entity_pks = [uri.rstrip('/').split('/')[-1] for uri in perm_uris]  # get the resource pks
+
+            # get the pks of groups or users currenty with this permission on this obj
+            current_entity_pks = [entity.pk for entity in entities_with_perms.iterkeys() if permission in entities_with_perms[entity]]
+
+            entities_to_add = set(new_entity_pks) - set(current_entity_pks)
+            entities_to_remove = set(current_entity_pks) - set(new_entity_pks)
+
+            for entity in entity_model.objects.filter(pk__in=entities_to_remove):
+                remove_perm(permission, entity, bundle.obj)
+
+            for entity in entity_model.objects.filter(pk__in=entities_to_add):
+                assign(permission, entity, bundle.obj)
