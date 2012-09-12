@@ -8,3 +8,4 @@ django-extensions==0.9
 ipdb==0.7
 ipython==0.13
 lazy==1.0
+django-social-auth==0.7.5

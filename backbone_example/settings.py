@@ -72,6 +72,16 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.contrib.messages.context_processors.messages",
+    'django.core.context_processors.request',
+)
+
 ROOT_URLCONF = 'backbone_example.urls'
 
 TEMPLATE_DIRS = (
@@ -87,12 +97,14 @@ INSTALLED_APPS = (
 
     'guardian',
     'django_extensions',
+    'social_auth',
 
     'base',
     'tweets'
 )
 
 AUTHENTICATION_BACKENDS = (
+    'social_auth.backends.twitter.TwitterBackend',
     'django.contrib.auth.backends.ModelBackend',  # this is default
     'guardian.backends.ObjectPermissionBackend',
 )
@@ -100,3 +112,27 @@ AUTHENTICATION_BACKENDS = (
 ANONYMOUS_USER_ID = 1
 
 API_VERSION = 'v1'
+
+LOGIN_URL          = '/login-form/'
+LOGIN_REDIRECT_URL = '/logged-in/'
+LOGIN_ERROR_URL    = '/login-error/'
+
+TWITTER_CONSUMER_KEY         = '7O7YUzfuIYUBm7zA6K1xQA'
+TWITTER_CONSUMER_SECRET      = 'aYl5l930PGx1N97YxUreJH1YT1jxZAGAhCCCNT1g'
+
+TWITTER_ACCESS_TOKEN         = '331027719-89VXUFOHMYcSu0rUlaNuquY9O48jFgcyNy4a6QnS'
+TWITTER_ACCESS_TOKEN_SECRET  = '75vPhfdzRwqMdnBRfofkCpMIJAnh7dvf7Fx32eDRg8'
+
+TWITTER_EXTRA_DATA = [
+    ('screen_name', 'screen_name'),
+    ('profile_image_url', 'profile_image_url'),
+    ('geo_enabled', 'geo_enabled'),
+    ('followers_count', 'followers_count'),
+    ('default_profile_image', 'default_profile_image'),
+    ('utc_offset', 'utc_offset'),
+    ('statuses_count', 'statuses_count'),
+    ('friends_count', 'friends_count'),
+    ('url', 'url'),
+    ('location', 'location'),
+    ('protected', 'protected')
+]

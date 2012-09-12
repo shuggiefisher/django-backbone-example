@@ -87,7 +87,7 @@ class TweetResource(ModelResource):
     class Meta:
         queryset = Tweet.objects.all()  # this is ignored by get_object_list() above
         authorization = Authorization()
-        read_only_fields = ['timestamp']  # ['created_by', 'timestamp']
+        read_only_fields = ['timestamp', 'type']  # ['created_by', 'timestamp']
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'delete', 'put']
 
@@ -160,9 +160,13 @@ class TweetResource(ModelResource):
             for entity in entity_model.objects.filter(pk__in=entities_to_remove):
                 remove_perm(permission, entity, bundle.obj)
                 if resource_permission == 'is_admin':
-                    if set(current_entity_pks) - entities_to_remove == set():
-                        # if everyone else is removed, the original author should remain the admin
-                        entities_to_add |= set(obj.created_by.pk)
+                    if set(current_entity_pks) - entities_to_remove == set() and entities_to_add == set():
+                        # if everyone else is removed, the original author or everyone should remain the admin
+                        if obj.created_by is None:
+                            default_admin = everyone
+                        else:
+                            default_admin = obj.created_by
+                        assign(permission, default_admin, bundle.obj)
 
             for entity in entity_model.objects.filter(pk__in=entities_to_add):
                 assign(permission, entity, bundle.obj)

@@ -47,6 +47,18 @@
   </head>
 
   <body>
+
+  <span style="float: right;">
+    {% if request.user.is_anonymous %}
+    <a href="/login/twitter?next={{ request.get_full_path }}" class="connect_with_twitter_button">
+      <span>Connect with Twitter</span>
+    </a>
+    {% else %}
+    <img height="25" width="25" src="{{ request.user.social_auth.get.extra_data.profile_image_url }}" alt="{{ request.user.username }}" title="{{ request.user.username }}">
+    {{ request.user.username }}
+    {% endif %}
+  </span>
+
     <div id="app">
       {% if data %}
       {% mustache "detailApp" data %}
