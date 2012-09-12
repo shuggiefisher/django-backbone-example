@@ -1,6 +1,9 @@
 from tastypie.api import Api
 from resources import TweetResource
-from base.api.resources import UserResource
+from base.api.resources import UserResource, GroupResource
+from django.conf import settings
 
-v1 = Api("v1")
-v1.register(TweetResource(), UserResource())
+v1 = Api(settings.API_VERSION)
+v1.register(TweetResource())
+v1.register(UserResource())
+v1.register(GroupResource())
