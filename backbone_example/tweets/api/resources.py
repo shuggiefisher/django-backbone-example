@@ -13,19 +13,22 @@ from guardian.shortcuts import get_objects_for_user, get_objects_for_group, \
 from lazy import lazy
 
 from tweets.models import Tweet
+from base.api.resources import UserResource
 
 everyone = Group.objects.get(name='Everyone')
 anonymous_user = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
 
 
 class TweetResource(ModelResource):
-    # created_by = fields.ForeignKey(UserRelatedResource, 'created_by', null=True)
+    created_by = fields.ForeignKey(UserResource, 'created_by', null=True)
     can_view = fields.ListField()
     can_edit = fields.ListField()
     is_admin = fields.ListField()
     group_can_view = fields.ListField()
     group_can_edit = fields.ListField()
     group_is_admin = fields.ListField()
+    can_edit_permissions = fields.BooleanField()
+    can_edit_element = fields.BooleanField()
 
     def __init__(self, **kwargs):
         super(TweetResource, self).__init__(**kwargs)
@@ -34,14 +37,14 @@ class TweetResource(ModelResource):
 
     def obj_create(self, bundle, request, **kwargs):
         if request.user.is_authenticated() and request.user.is_active:
-            user_pk = request.user.pk
+            user_pk = request.user
         else:
             user_pk = None
-        bundle.data['created_by'] = {'pk': user_pk}
+        bundle.data['created_by'] = user_pk
         return super(TweetResource, self).obj_create(bundle, request, **kwargs)
 
     def obj_update(self, bundle, request, **kwargs):
-        import ipdb; ipdb.set_trace()
+        self.fields['created_by'].readonly = True
         bundle = super(TweetResource, self).obj_update(bundle, request, **kwargs)
         self.update_permissions(bundle, request.user)
         return bundle
@@ -100,6 +103,25 @@ class TweetResource(ModelResource):
 
     def dehydrate_group_is_admin(self, bundle):
         return self.with_perm('admin_element', bundle.obj, resource='group')
+
+    def dehydrate_group_is_admin(self, bundle):
+        return self.with_perm('admin_element', bundle.obj, resource='group')
+
+    def dehydrate_can_edit_permissions(self, bundle):
+        if bundle.request.user.is_anonymous():
+            requesting_user = anonymous_user
+        else:
+            requesting_user = bundle.request.user
+
+        return requesting_user.has_perm('admin_element', bundle.obj)
+
+    def dehydrate_can_edit_element(self, bundle):
+        if bundle.request.user.is_anonymous():
+            requesting_user = anonymous_user
+        else:
+            requesting_user = bundle.request.user
+
+        return requesting_user.has_perm('edit_element', bundle.obj)
 
     class Meta:
         queryset = Tweet.objects.all()  # this is ignored by get_object_list() above

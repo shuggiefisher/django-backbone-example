@@ -16,6 +16,9 @@ class Tweet(models.Model):
             ('admin_element', 'Is admin of element'),
         )
 
+    def __unicode__(self):
+        return unicode("%s : %s : %s" % (self.pk, self.created_by, self.message))
+
     def save(self, *args, **kwargs):
         if self.pk is None:
             created = True

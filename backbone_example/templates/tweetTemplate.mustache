@@ -6,6 +6,8 @@
     {{{can_view_html}}}
     {{{can_edit_html}}}
     {{{is_admin_html}}}
+    {{#can_edit_permissions}}
     <button class="destroy btn">Delete</button>
+    {{/can_edit_permissions}}
 </div>
 <input class="edit" value="{{ message }}">

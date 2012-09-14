@@ -134,9 +134,11 @@ var ENTER_KEY = 13;
 
         renderPerms: function() {
             var permSelects = {};
-            _.each(['can_view', 'can_edit', 'is_admin'], function(perm){
-                permSelects[perm + '_html'] = this.renderPermSelect(perm, this.model.attributes[perm], this.model.attributes['group_' + perm]);
-            }, this);
+            if (this.model.attributes['can_edit_permissions'] === true) {
+                _.each(['can_view', 'can_edit', 'is_admin'], function(perm){
+                    permSelects[perm + '_html'] = this.renderPermSelect(perm, this.model.attributes[perm], this.model.attributes['group_' + perm]);
+                }, this);
+            }
             return permSelects;
         },
 
