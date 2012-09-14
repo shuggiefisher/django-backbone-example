@@ -9,5 +9,8 @@
     {{#can_edit_permissions}}
     <button class="destroy btn">Delete</button>
     {{/can_edit_permissions}}
+    {{#can_edit_element}}
+    Editable
+    {{/can_edit_element}}
 </div>
 <input class="edit" value="{{ message }}">

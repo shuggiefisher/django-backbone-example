@@ -75,8 +75,10 @@ var ENTER_KEY = 13;
         },
 
         edit: function() {
-            $(this.el).addClass('editing');
-            this.$('.edit').focus();
+            if (this.model.attributes['can_edit_element'] === true) {
+                $(this.el).addClass('editing');
+                this.$('.edit').focus();
+            }
         },
 
         updateOnEnter: function( e ) {
