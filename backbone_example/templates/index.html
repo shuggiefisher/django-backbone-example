@@ -38,7 +38,7 @@
 
     {% if users_and_groups %}
     <script type="text/html" id="usersAndGroupsSelect">
-      <select multiple="multiple" class="perms{% verbatim %} {{perm}}{% endverbatim %}">
+      <select multiple="multiple" class="perms"{% verbatim %} data-perm-type="{{perm}}"{% endverbatim %}>
         {% mustache "usersAndGroupsSelect" users_and_groups %}
       </select>
     </script>

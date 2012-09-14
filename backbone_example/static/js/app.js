@@ -58,7 +58,7 @@ var ENTER_KEY = 13;
             'dblclick .message': 'edit',
             'keypress .edit': 'updateOnEnter',
             'blur .edit': 'close',
-            'change select': 'updatePerms'
+            'change select.perms': 'updatePerms'
         },
 
         initialize: function(){
@@ -97,8 +97,29 @@ var ENTER_KEY = 13;
 			$(this.el).removeClass('editing');
 		},
 
-        updatePerms: function() {
-            
+        selectedPerms: function() {
+            //ignore which one triggered this, let's update them all
+            var attributes = this.model.attributes;
+            $(this.el).find('.perms').each(function() {
+                var $this = $(this);
+                var permType = $this.data('perm-type');
+                attributes[permType] = [];
+                attributes['group_' + permType] = [];
+                _.each($this.val(), function(resource_uri) {
+                    if (resource_uri.indexOf('group') == -1) {
+                        attributes[permType].push({'resource_uri': resource_uri});
+                    }
+                    else {
+                        attributes['group_' + permType].push({'resource_uri': resource_uri});
+                    }
+                });
+            });
+            this.model.attributes = attributes;
+        },
+
+        updatePerms: function(e) {
+            this.selectedPerms();
+            this.model.save();
         },
 
         renderPermSelect: function(perm, users, groups) {
@@ -111,7 +132,7 @@ var ENTER_KEY = 13;
             return $select[0].outerHTML;
         },
 
-        renderPerms: function(model) {
+        renderPerms: function() {
             var permSelects = {};
             _.each(['can_view', 'can_edit', 'is_admin'], function(perm){
                 permSelects[perm + '_html'] = this.renderPermSelect(perm, this.model.attributes[perm], this.model.attributes['group_' + perm]);
@@ -120,7 +141,7 @@ var ENTER_KEY = 13;
         },
 
         render: function(){
-            var selectHTML = this.renderPerms(this.model);
+            var selectHTML = this.renderPerms();
             var data = _.extend(this.model.toJSON(), selectHTML);
             $(this.el).html(ich.tweetTemplate(data));
             this.input = this.$('.edit');

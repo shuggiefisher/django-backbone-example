@@ -7,6 +7,7 @@ from tastypie import fields
 from tastypie.authorization import Authorization
 from tastypie import http
 from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.utils import dict_strip_unicode_keys
 from guardian.shortcuts import get_objects_for_user, get_objects_for_group, \
     get_users_with_perms, get_groups_with_perms, remove_perm, assign
 from lazy import lazy
@@ -19,17 +20,17 @@ anonymous_user = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
 
 class TweetResource(ModelResource):
     # created_by = fields.ForeignKey(UserRelatedResource, 'created_by', null=True)
-    can_view = fields.ListField(readonly=True, blank=True)
-    can_edit = fields.ListField(readonly=True, blank=True)
-    is_admin = fields.ListField(readonly=True, blank=True)
-    group_can_view = fields.ListField(readonly=True, blank=True)
-    group_can_edit = fields.ListField(readonly=True, blank=True)
-    group_is_admin = fields.ListField(readonly=True, blank=True)
+    can_view = fields.ListField()
+    can_edit = fields.ListField()
+    is_admin = fields.ListField()
+    group_can_view = fields.ListField()
+    group_can_edit = fields.ListField()
+    group_is_admin = fields.ListField()
 
     def __init__(self, **kwargs):
         super(TweetResource, self).__init__(**kwargs)
-        for fieldname in getattr(self.Meta, 'read_only_fields', []):
-            self.fields[fieldname].readonly = True
+        for f in getattr(self.Meta, 'readonly_fields', []):
+            self.fields[f].readonly = True
 
     def obj_create(self, bundle, request, **kwargs):
         if request.user.is_authenticated() and request.user.is_active:
@@ -40,9 +41,25 @@ class TweetResource(ModelResource):
         return super(TweetResource, self).obj_create(bundle, request, **kwargs)
 
     def obj_update(self, bundle, request, **kwargs):
+        import ipdb; ipdb.set_trace()
         bundle = super(TweetResource, self).obj_update(bundle, request, **kwargs)
         self.update_permissions(bundle, request.user)
         return bundle
+
+    def put_detail(self, request, **kwargs):
+        deserialized = self.deserialize(request, request.raw_post_data, format=request.META.get('CONTENT_TYPE', 'application/json'))
+        deserialized = self.alter_deserialized_detail_data(request, deserialized)
+        bundle = self.build_bundle(data=dict_strip_unicode_keys(deserialized), request=request)
+        self.is_valid(bundle, request)
+
+        updated_bundle = self.obj_update(bundle, request=request, **self.remove_api_resource_names(kwargs))
+
+        if not self._meta.always_return_data:
+            return http.HttpNoContent()
+        else:
+            updated_bundle = self.full_dehydrate(updated_bundle)
+            updated_bundle = self.alter_detail_data_to_serialize(request, updated_bundle)
+            return self.create_response(request, updated_bundle, response_class=http.HttpAccepted)
 
     def get_object_list(self, request):
         """
@@ -87,7 +104,7 @@ class TweetResource(ModelResource):
     class Meta:
         queryset = Tweet.objects.all()  # this is ignored by get_object_list() above
         authorization = Authorization()
-        read_only_fields = ['timestamp', 'type']  # ['created_by', 'timestamp']
+#        readonly_fields = ['timestamp'] don't use this because value will be ignored anyway
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'delete', 'put']
 
@@ -144,14 +161,14 @@ class TweetResource(ModelResource):
         self._update_perms(bundle, users_with_perms, resource_permissions, User)
 
     def _update_perms(self, bundle, entities_with_perms, resource_permissions, entity_model):
-        permissions = ['can_view', 'can_edit', 'is_admin']
+        permissions = ['view_element', 'edit_element', 'admin_element']
         for permission, resource_permission in zip(permissions, resource_permissions):
 
             perm_pairs = bundle.data[resource_permission]  # get data for this permission from bundle
             perm_uris = [perm_pair['resource_uri'] for perm_pair in perm_pairs]  # get the resource_uris
-            new_entity_pks = [uri.rstrip('/').split('/')[-1] for uri in perm_uris]  # get the resource pks
+            new_entity_pks = [int(uri.rstrip('/').split('/')[-1]) for uri in perm_uris]  # get the resource pks
 
-            # get the pks of groups or users currenty with this permission on this obj
+            # get the pks of groups or users currently with this permission on this obj
             current_entity_pks = [entity.pk for entity in entities_with_perms.iterkeys() if permission in entities_with_perms[entity]]
 
             entities_to_add = set(new_entity_pks) - set(current_entity_pks)
@@ -162,10 +179,10 @@ class TweetResource(ModelResource):
                 if resource_permission == 'is_admin':
                     if set(current_entity_pks) - entities_to_remove == set() and entities_to_add == set():
                         # if everyone else is removed, the original author or everyone should remain the admin
-                        if obj.created_by is None:
+                        if bundle.obj.created_by is None:
                             default_admin = everyone
                         else:
-                            default_admin = obj.created_by
+                            default_admin = bundle.obj.created_by
                         assign(permission, default_admin, bundle.obj)
 
             for entity in entity_model.objects.filter(pk__in=entities_to_add):
