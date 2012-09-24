@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load mustache %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+
+    {% block meta %}
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% endblock %}
+
+    {% block extra_css %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/jquery.mobile-1.1.1.css" />
+    {% endblock %}
+
+    {% block extra_js_libraries %}
+        <script src="{{ STATIC_URL }}js/jquery.mobile-1.1.1.js"></script>
+    {% endblock %}
+
+</head>
+<body>
+
+    {% block body %}
+
+        <div data-role="page">
+
+            <div data-role="header">
+                <h1>My Title</h1>
+            </div><!-- /header -->
+
+            <div id="app" data-role="content">
+                {% if data %}
+                {% mustache "detailApp" data %}
+                {% endif %}
+            </div><!-- /content -->
+
+        </div><!-- /page -->
+
+    {% endblock %}
+
+</body>
+</html>
