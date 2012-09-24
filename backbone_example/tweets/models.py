@@ -10,14 +10,18 @@ class Tweet(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('auth.User', null=True)
     type = models.CharField(max_length=30, null=True, blank=True)
-    parents = TreeManyToManyField('self', related_name='children')
+#    parents = TreeManyToManyField('self', null=True, blank=True, related_name='children')
+    parents = models.ManyToManyField('self', null=True, blank=True, related_name='children')
 
-    class MPTTMeta:
+    class Meta:
         permissions = (
             ('view_element', 'Can view element'),
             ('edit_element', 'Can edit element'),
             ('admin_element', 'Is admin of element'),
         )
+
+#    class MPTTMeta:
+#        parent_attr = 'parents'
 
     def __unicode__(self):
         return unicode("%s : %s : %s" % (self.pk, self.created_by, self.message))
