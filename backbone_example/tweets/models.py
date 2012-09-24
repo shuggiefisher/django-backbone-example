@@ -1,6 +1,8 @@
 from django.db import models
-from guardian.shortcuts import assign
 from django.contrib.auth.models import Group
+
+from guardian.shortcuts import assign
+from mptt.models import MPTTModel, TreeManyToManyField
 
 
 class Tweet(models.Model):
@@ -8,8 +10,9 @@ class Tweet(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('auth.User', null=True)
     type = models.CharField(max_length=30, null=True, blank=True)
+    parents = TreeManyToManyField('self', related_name='children')
 
-    class Meta:
+    class MPTTMeta:
         permissions = (
             ('view_element', 'Can view element'),
             ('edit_element', 'Can edit element'),
