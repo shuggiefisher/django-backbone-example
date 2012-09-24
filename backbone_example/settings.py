@@ -98,6 +98,7 @@ INSTALLED_APPS = (
     'guardian',
     'django_extensions',
     'social_auth',
+    'mptt',
 
     'base',
     'tweets'
@@ -110,6 +111,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 ANONYMOUS_USER_ID = 1
+EVERYONE_GROUP_ID = 1
 
 API_VERSION = 'v1'
 

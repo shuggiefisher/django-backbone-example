@@ -15,7 +15,7 @@ from lazy import lazy
 from tweets.models import Tweet
 from base.api.resources import UserResource
 
-everyone = Group.objects.get(name='Everyone')
+everyone = Group.objects.get(pk=settings.EVERYONE_GROUP_ID)
 anonymous_user = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
 
 
@@ -156,7 +156,7 @@ class TweetResource(ModelResource):
                     entity_name = entity.name
                 else:
                     entity_name = entity.username
-                    
+
                 entity_uris.append({'name': entity_name,
                                     'resource_uri': uri
                 })

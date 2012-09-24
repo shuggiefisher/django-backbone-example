@@ -1,38 +1,38 @@
 [
     {
         "fields": {
-            "name": "Everyone", 
+            "name": "Everyone",
             "permissions": []
-        }, 
-        "model": "auth.group", 
-        "pk": 1
-    }, 
-    {
-        "fields": {
-            "domain": "example.com", 
-            "name": "example.com"
-        }, 
-        "model": "sites.site", 
+        },
+        "model": "auth.group",
         "pk": 1
     },
     {
         "fields": {
-            "date_joined": "2012-09-11 17:12:10", 
-            "email": "", 
-            "first_name": "", 
+            "domain": "example.com",
+            "name": "example.com"
+        },
+        "model": "sites.site",
+        "pk": 1
+    },
+    {
+        "fields": {
+            "date_joined": "2012-09-11 17:12:10",
+            "email": "",
+            "first_name": "",
             "groups": [
                 1
-            ], 
-            "is_active": true, 
-            "is_staff": false, 
-            "is_superuser": false, 
-            "last_login": "2012-09-11 17:12:10", 
-            "last_name": "", 
-            "password": "", 
-            "user_permissions": [], 
+            ],
+            "is_active": true,
+            "is_staff": false,
+            "is_superuser": false,
+            "last_login": "2012-09-11 17:12:10",
+            "last_name": "",
+            "password": "",
+            "user_permissions": [],
             "username": "AnonymousUser"
-        }, 
-        "model": "auth.user", 
+        },
+        "model": "auth.user",
         "pk": 1
     }
 ]
