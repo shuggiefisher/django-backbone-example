@@ -5,7 +5,7 @@ from api import v1
 from .models import Tweet
 
 class IndexView(TemplateView):
-    template_name = 'index.html'
+    template_name = 'mobile.html'
 
     def get_users_and_groups(self):
         ur = v1.canonical_resource_for('user')
@@ -30,7 +30,7 @@ class IndexView(TemplateView):
         return base
 
 class DetailView(IndexView):
-    template_name = 'index.html'
+    template_name = 'mobile.html'
 
     def get_detail(self, pk):
         tr = v1.canonical_resource_for('tweet')
