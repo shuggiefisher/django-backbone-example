@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load mustache %}
+{% load straight_include %}
+{% load verbatim %}
 
 <!DOCTYPE html>
 <html>
@@ -14,7 +16,44 @@
     {% endblock %}
 
     {% block extra_js_libraries %}
+        <script type="text/javascript">
+            $(document).bind("mobileinit", function(){
+                $.mobile.hashListeningEnabled = false;
+            });
+        </script>
         <script src="{{ STATIC_URL }}js/jquery.mobile-1.1.1.js"></script>
+    {% endblock %}
+
+    {% block jstemplates %}
+
+        <script>
+            TWEET_API = "{% url api_dispatch_list api_name="v1" resource_name="tweet" %}";
+            {% if data %}
+                app = {loaded: true};
+            {% endif %}
+        </script>
+        <script src="{{ STATIC_URL }}js/appMobile.js"></script>
+
+        <script type="text/html" id="tweetTemplate">
+            {% straight_include "tweetTemplateMobile.mustache" %}
+        </script>
+
+        <script type="text/html" id="listApp">
+            {% straight_include "listAppMobile.mustache" %}
+        </script>
+
+        <script type="text/html" id="detailApp">
+            {% straight_include "detailApp.mustache" %}
+        </script>
+
+        {% if users_and_groups %}
+            <script type="text/html" id="usersAndGroupsSelect">
+                <select multiple="multiple" class="perms"{% verbatim %} data-perm-type="{{perm}}"{% endverbatim %}>
+                    {% mustache "usersAndGroupsSelect" users_and_groups %}
+                </select>
+            </script>
+        {% endif %}
+
     {% endblock %}
 
 </head>

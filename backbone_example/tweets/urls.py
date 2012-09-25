@@ -4,15 +4,13 @@ from tweets.api import v1
 from .views import IndexView, DetailView
 
 urlpatterns = patterns('',
-    url(r'^$',
-        IndexView.as_view(),
-        name='index'),
+    url(r'^$', IndexView.as_view(), name='index'),
 
-    url(r'^(?P<pk>\d+)/$',
-        DetailView.as_view(),
-        name="detail"),
+    url(r'^(?P<pk>\d+)/$', DetailView.as_view(), name="detail"),
 
     url(r'^api/', include(v1.urls)),
+
+    (r'(.+\.html)$', 'django.views.generic.simple.direct_to_template')
 )
 
 
