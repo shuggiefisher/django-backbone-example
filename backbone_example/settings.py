@@ -102,6 +102,7 @@ INSTALLED_APPS = (
     'social_auth',
     'mptt',
     'pipeline',
+    'manifesto',
 
     'base',
     'tweets'
@@ -145,6 +146,8 @@ TWITTER_EXTRA_DATA = [
 
 # PIPELINE CONFIG
 
+PIPELINE = not DEBUG
+
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 PIPELINE_STORAGE = 'pipeline.storage.PipelineFinderStorage'
 
@@ -161,6 +164,7 @@ PIPELINE_CSS = {
             'media': 'all',
         },
         'manifest': False,
+        # this setting puts the source files in the manifest, whereas we want the versioned output_filename
     },
 }
 
