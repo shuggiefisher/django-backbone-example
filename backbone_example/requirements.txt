@@ -10,3 +10,5 @@ ipython==0.13
 lazy==1.0
 django-social-auth==0.7.5
 django-mptt==0.5.4
+django-pipline==1.2.17
+yuicompressor==2.4.7

@@ -38,8 +38,8 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(PROJECT_ROOT,'media')
-STATIC_ROOT = os.path.join(PROJECT_ROOT, 'collected_static')
+MEDIA_ROOT = os.path.join(PROJECT_ROOT,'media/')
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'collected_static/')
 STATICFILES_DIRS = (
     os.path.join(PROJECT_ROOT, 'static'),
 )
@@ -66,6 +66,8 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.gzip.GZipMiddleware',
+    'pipeline.middleware.MinifyHTMLMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -99,6 +101,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'social_auth',
     'mptt',
+    'pipeline',
 
     'base',
     'tweets'
@@ -138,3 +141,41 @@ TWITTER_EXTRA_DATA = [
     ('location', 'location'),
     ('protected', 'protected')
 ]
+
+
+# PIPELINE CONFIG
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+PIPELINE_STORAGE = 'pipeline.storage.PipelineFinderStorage'
+
+PIPELINE_TEMPLATE_EXT = '.mustache'
+
+PIPELINE_CSS = {
+    'mobile': {
+        'source_filenames': (
+          'css/style.css',
+          'css/jquery.mobile-1.1.1.css',
+        ),
+        'output_filename': 'css/mobile.css',
+        'extra_context': {
+            'media': 'all',
+        },
+        'manifest': False,
+    },
+}
+
+PIPELINE_JS = {
+    'mobile': {
+        'source_filenames': (
+            'js/jquery-1.6.4.js',
+            'js/jquery.mobile-1.1.1.js',
+            'js/underscore-min.js',
+            'js/backbone-min.js',
+            'js/backbone-tastypie.js',
+            'js/ICanHaz.min.js',
+            'js/appMobile.js',
+        ),
+        'output_filename': 'js/mobile.js',
+        'manifest': False,
+    }
+}
