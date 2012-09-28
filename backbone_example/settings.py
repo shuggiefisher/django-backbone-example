@@ -91,6 +91,10 @@ TEMPLATE_DIRS = (
   os.path.join(PROJECT_ROOT, "templates"),
 )
 
+MUSTACHE_TEMPLATE_DIRS = (
+  os.path.join(STATICFILES_DIRS[0], "mustache"),
+)
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -168,6 +172,7 @@ STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 PIPELINE_STORAGE = 'pipeline.storage.PipelineFinderStorage'
 
 PIPELINE_TEMPLATE_EXT = '.mustache'
+PIPELINE_TEMPLATE_FUNC = 'Handlebars.compile'
 
 PIPELINE_CSS = {
     'mobile': {
@@ -192,9 +197,9 @@ PIPELINE_JS = {
             'js/underscore-min.js',
             'js/backbone-min.js',
             'js/backbone-tastypie.js',
-            'js/ICanHaz.min.js',
+            'js/handlebars-1.0.rc.1.js',
             'js/appMobile.js',
-            'templates/*.mustache'
+            'mustache/*.mustache'
         ),
         'output_filename': 'js/mobile.js',
         'manifest': False,

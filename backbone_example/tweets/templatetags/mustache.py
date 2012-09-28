@@ -5,7 +5,7 @@ import pystache
 register = template.Library()
 
 class View(pystache.View):
-    template_path = settings.TEMPLATE_DIRS[0]
+    template_path = settings.MUSTACHE_TEMPLATE_DIRS[0]
 
     def __init__(self, template_name, context):
         self.template_name = template_name
@@ -24,11 +24,11 @@ class MustacheNode(template.Node):
 def do_mustache(parser, token):
     """
     Loads a mustache template and render it inline
-    
+
     Example::
-    
+
     {% mustache "foo/bar" data %}
-    
+
     """
     bits = token.split_contents()
     if len(bits) not in  [2,3]:

@@ -27,7 +27,7 @@ register = template.Library()
 
 class StraightIncludeNode(template.Node):
     def __init__(self, template_path):
-        self.filepath = '%s/%s' % (settings.TEMPLATE_DIRS[0], template_path)
+        self.filepath = '%s/%s' % (settings.MUSTACHE_TEMPLATE_DIRS[0], template_path)
 
     def render(self, context):
         fp = open(self.filepath, 'r')
@@ -39,17 +39,17 @@ class StraightIncludeNode(template.Node):
 def do_straight_include(parser, token):
     """
     Loads a template and includes it without processing it
-    
+
     Example::
-    
+
     {% straight_include "foo/some_include" %}
-    
+
     """
     bits = token.split_contents()
     if len(bits) != 2:
         raise template.TemplateSyntaxError("%r tag takes one argument: the location of the file within the template folder" % bits[0])
     path = bits[1][1:-1]
-    
+
     return StraightIncludeNode(path)
 
 

@@ -5,29 +5,34 @@
 
 <!doctype html>
 <html lang="en"{% if not debug %} manifest="{% url cache_manifest %}"{% endif %}>
-  <head>
-  <title>Interlist</title>
+    <head>
+        <title>Interlist</title>
 
-  {% block meta %}
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-  {% endblock %}
+        {% block meta %}
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% endblock %}
 
-  {% compressed_css 'mobile' %}
-  {% compressed_js 'mobile' %}
+        <script>
+            TWEET_API = "{% url api_dispatch_list api_name="v1" resource_name="tweet" %}";
+            {% if data %}
+                app = {loaded: true};
+            {% endif %}
+        </script>
 
-  {% block jstemplates %}
+        {% compressed_css 'mobile' %}
+        {% compressed_js 'mobile' %}
 
-    <script>
-      TWEET_API = "{% url api_dispatch_list api_name="v1" resource_name="tweet" %}";
-      {% if data %}
-        app = {loaded: true};
-      {% endif %}
-    </script>
+        <script>
+            {% if users_and_groups %}
+                window.JST['usersAndGroupsSelect'] = Handlebars.compile('\
+                    <select multiple="multiple" class="perms"{% verbatim %} data-perm-type="{{perm}}"{% endverbatim %}>\
+                        {% mustache "usersAndGroupsSelect" users_and_groups %}\
+                    </select>\
+                ');
+            {% endif %}
+        </script>
 
-
-  {% endblock %}
-
-</head>
+    </head>
 <body>
 
     {% block body %}
@@ -40,7 +45,7 @@
 
             <div id="app" data-role="content">
                 {% if data %}
-                {% mustache "detailApp" data %}
+                    {% mustache "detailApp" data %}
                 {% endif %}
             </div><!-- /content -->
 

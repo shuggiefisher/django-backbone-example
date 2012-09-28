@@ -99,7 +99,7 @@ var ENTER_KEY = 13;
 		},
 
         render: function(){
-            $(this.el).html(ich.tweetTemplate(this.model.toJSON())).trigger('create');
+            $(this.el).html(JST.tweetTemplateMobile(this.model.toJSON())).trigger('create');
             this.input = this.$('.edit');
             return this;
         }
@@ -117,7 +117,7 @@ var ENTER_KEY = 13;
         },
 
         render: function(){
-            $(this.el).html(ich.detailApp(this.model.toJSON()));
+            $(this.el).html(JST.detailApp(this.model.toJSON()));
             return this;
         }
     });
@@ -191,7 +191,7 @@ var ENTER_KEY = 13;
         },
 
         render: function(){
-            $(this.el).html(ich.listApp({}));
+            $(this.el).html(JST.listApp({}));
             var list = new ListView({
                 collection: this.collection,
                 el: this.$('#tweets')
