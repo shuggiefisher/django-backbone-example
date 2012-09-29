@@ -54,7 +54,7 @@ var ENTER_KEY = 13;
 
         events: {
             'click .permalink': 'navigate',
-            'click .destroy': 'clear',
+            'taphold .message': 'clear',
             'dblclick .message': 'edit',
             'keypress .edit': 'updateOnEnter',
             'blur .edit': 'close'
