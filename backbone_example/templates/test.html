@@ -26,7 +26,7 @@
             {% if users_and_groups %}
                 window.JST['usersAndGroupsSelect'] = Handlebars.compile('\
                     <select multiple="multiple" class="perms"{% verbatim %} data-perm-type="{{perm}}"{% endverbatim %}>\
-                        {% mustache "usersAndGroupsSelect" users_and_groups %}\
+                        {% mustache "usersAndGroupsSelectOptions" users_and_groups %}\
                     </select>\
                 ');
             {% endif %}

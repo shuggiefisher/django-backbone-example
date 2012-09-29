@@ -99,7 +99,7 @@ var ENTER_KEY = 13;
 		},
 
         render: function(){
-            $(this.el).html(JST.tweetTemplateMobile(this.model.toJSON())).trigger('create');
+            $(this.el).html(JST.tweetTemplateMobile(this.model.toJSON()));
             this.input = this.$('.edit');
             return this;
         }
@@ -152,7 +152,7 @@ var ENTER_KEY = 13;
         initialize: function(){
             _.bindAll(this, 'addOne', 'addAll', 'deleteOne');
 
-            this.collection.bind('add', this.addOne);
+            this.collection.bind('add', this.addJustOne, this);
             this.collection.bind('reset', this.addAll, this);
             this.collection.bind('remove', this.deleteOne, this);
             this.views = [];
@@ -161,6 +161,11 @@ var ENTER_KEY = 13;
         addAll: function(){
             this.views = [];
             this.collection.each(this.addOne);
+        },
+
+        addJustOne: function(tweet) {
+            this.addOne(tweet);
+            this.el.listview('refresh'); // get jqm to refresh styling to the list
         },
 
         addOne: function(tweet){
