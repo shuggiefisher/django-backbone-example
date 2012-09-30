@@ -177,7 +177,7 @@ PIPELINE_TEMPLATE_FUNC = 'Handlebars.compile'
 PIPELINE_CSS = {
     'mobile': {
         'source_filenames': (
-          'css/style.css',
+          'css/styleMobile.css',
           'css/jquery.mobile-1.1.1.css',
         ),
         'output_filename': 'css/mobile.css',

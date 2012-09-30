@@ -35,7 +35,7 @@ body {
   margin: .25em 0;
 }
 
-input.edit {
+li.tweet input.edit {
     display: none;
 }
 
