@@ -20,34 +20,50 @@ var ENTER_KEY = 13;
         }
     });
 
+    window.Me = TastypieModel.extend({
+        url: ME_RESOURCE,
+
+        initialize: function() {
+            this.bind('change', function() {
+                app.connect.render(this);
+            });
+        }
+    });
+
+    window.Mes = TastypieCollection.extend({
+        // how should I deal with a singleton collection?
+
+        url: ME_RESOURCE,
+        model: Me,
+
+        // set this model to read only - no point, js cannot be trusted anyway
+
+        initialize: function() {
+            this.storage = new Offline.Storage('me', this, {autoPush: false});
+        }
+
+    });
+
+    window.ConnectView = Backbone.View.extend({
+        el: "#connect",
+
+        render: function(me) {
+            $(this.el).html(JST.connect(me.toJSON()));
+            return this;
+        }
+    });
+
     window.Tweet = TastypieModel.extend({
-        url: TWEET_API
+        url: TWEET_RESOURCE
     });
 
     window.Tweets = TastypieCollection.extend({
-        url: TWEET_API,
+        url: TWEET_RESOURCE,
         model: Tweet,
 
         initialize: function() {
             this.storage = new Offline.Storage('interlists', this, {autoPush: true});
-        },
-
-        getOrFetch: function(id, options){
-            // Helper function to use this collection as a cache for models on the server
-            var model = this.get(id);
-
-            if(model){
-                options.success && options.success(model);
-                return;
-            }
-
-            model = new Tweet({
-                resource_uri: id
-            });
-
-            model.fetch(options);
         }
-
 
     });
 
@@ -235,6 +251,10 @@ var ENTER_KEY = 13;
         window.app = window.app || {};
         app.router = new Router();
         app.tweets = new Tweets();
+        app.mes = new Mes();
+        app.connect = new ConnectView({
+            collection: app.mes
+        });
         app.list = new ListApp({
             el: $("#app"),
             collection: app.tweets
@@ -243,23 +263,24 @@ var ENTER_KEY = 13;
             el: $("#app")
         });
         app.router.bind('route:list', function(){
-            //app.tweets.storage.sync.full({
+            // load me resource from local storage
+            app.mes.fetch({
+                local: true
+            });
+
             app.tweets.fetch({
                 local: true,
                 success: function(tweets) {
                     app.list.render(tweets);
                 }
             });
-            app.tweets.storage.sync.pull(); // try an update what is in localstorage
+
+            // update me resource from server
+            app.mes.storage.sync.full();
+            // try and update elements in localstorage
+            app.tweets.storage.sync.incremental();
+
         });
-        // app.router.bind('route:detail', function(id){
-        //     app.tweets.getOrFetch(app.tweets.urlRoot + id + '/', {
-        //         success: function(model){
-        //             app.detail.model = model;
-        //             app.detail.render();
-        //         }
-        //     });
-        // });
 
         app.list.bind('navigate', app.router.navigate_to, app.router);
         app.detail.bind('home', app.router.navigate_to, app.router);
@@ -273,6 +294,7 @@ var ENTER_KEY = 13;
             document.addEventListener("online", reconnected, false);
         }
         function reconnected() {
+            app.mes.storage.sync.full();
             app.tweets.storage.sync.incremental();
         }
 
@@ -284,9 +306,7 @@ var ENTER_KEY = 13;
                     // Browser downloaded a new app cache.
                     // Swap it in and reload the page to get the new hotness.
                     window.applicationCache.swapCache();
-                    if (confirm('A new version of this app is available. Hit OK to update')) {
-                        window.location.reload();
-                    }
+                    window.location.reload();  // don't ask if they want to reload - any changes should be in localstorage and will be synced on next page load
                 } else {
                   // Manifest didn't changed. Nothing new to server.
                 }

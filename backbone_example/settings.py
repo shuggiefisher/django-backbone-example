@@ -105,6 +105,7 @@ INSTALLED_APPS = (
     'guardian',
     'django_extensions',
     'social_auth',
+    'tastypie',
     'mptt',
     'pipeline',
     'manifesto',
@@ -162,6 +163,8 @@ TWITTER_EXTRA_DATA = [
     ('location', 'location'),
     ('protected', 'protected')
 ]
+
+SESSION_COOKIE_AGE = 9999999999999  # never expire the session, user must manually log out
 
 
 # PIPELINE CONFIG
