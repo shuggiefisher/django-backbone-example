@@ -1,32 +1,35 @@
 var ENTER_KEY = 13;
 
 (function(){
-    window.Tweet = Backbone.Model.extend({
-        urlRoot: TWEET_API
+
+    window.TastypieModel = Backbone.Model.extend({
+        base_url: function() {
+          var temp_url = Backbone.Model.prototype.url.call(this);
+          return (temp_url.charAt(temp_url.length - 1) == '/' ? temp_url : temp_url+'/');
+        },
+
+        url: function() {
+          return this.base_url();
+        }
     });
 
-    window.Tweets = Backbone.Collection.extend({
-        urlRoot: TWEET_API,
+    window.TastypieCollection = Backbone.Collection.extend({
+        parse: function(response) {
+            this.recent_meta = response.meta || {};
+            return response.objects || response;
+        }
+    });
+
+    window.Tweet = TastypieModel.extend({
+        url: TWEET_API
+    });
+
+    window.Tweets = TastypieCollection.extend({
+        url: TWEET_API,
         model: Tweet,
 
-        maybeFetch: function(options){
-            // Helper function to fetch only if this collection has not been fetched before.
-            if(this._fetched){
-                // If this has already been fetched, call the success, if it exists
-                options.success && options.success();
-                return;
-            }
-
-            // when the original success function completes mark this collection as fetched
-            var self = this,
-                successWrapper = function(success){
-                    return function(){
-                        self._fetched = true;
-                        success && success.apply(this, arguments);
-                    };
-                };
-            options.success = successWrapper(options.success);
-            this.fetch(options);
+        initialize: function() {
+            this.storage = new Offline.Storage('interlists', this, {autoPush: true});
         },
 
         getOrFetch: function(id, options){
@@ -165,7 +168,7 @@ var ENTER_KEY = 13;
 
         addJustOne: function(tweet) {
             this.addOne(tweet);
-            this.el.listview('refresh'); // get jqm to refresh styling to the list
+            this.$el.listview('refresh'); // get jqm to refresh styling to the list
         },
 
         addOne: function(tweet){
@@ -207,7 +210,7 @@ var ENTER_KEY = 13;
                 collection: this.collection,
                 el: this.$('#input')
             });
-            app.list.el.trigger('create'); // once all are added tell jquery mobile to style the whole page
+            app.list.$el.trigger('create'); // once all are added tell jquery mobile to style the whole page
         }
     });
 
@@ -240,18 +243,23 @@ var ENTER_KEY = 13;
             el: $("#app")
         });
         app.router.bind('route:list', function(){
-            app.tweets.maybeFetch({
-                success: _.bind(app.list.render, app.list)
-            });
-        });
-        app.router.bind('route:detail', function(id){
-            app.tweets.getOrFetch(app.tweets.urlRoot + id + '/', {
-                success: function(model){
-                    app.detail.model = model;
-                    app.detail.render();
+            //app.tweets.storage.sync.full({
+            app.tweets.fetch({
+                local: true,
+                success: function(tweets) {
+                    app.list.render(tweets);
                 }
             });
+            app.tweets.storage.sync.pull(); // try an update what is in localstorage
         });
+        // app.router.bind('route:detail', function(id){
+        //     app.tweets.getOrFetch(app.tweets.urlRoot + id + '/', {
+        //         success: function(model){
+        //             app.detail.model = model;
+        //             app.detail.render();
+        //         }
+        //     });
+        // });
 
         app.list.bind('navigate', app.router.navigate_to, app.router);
         app.detail.bind('home', app.router.navigate_to, app.router);
@@ -259,5 +267,13 @@ var ENTER_KEY = 13;
             pushState: true,
             silent: app.loaded
         });
+
+        document.addEventListener("deviceready", onDeviceReady, false);
+        function onDeviceReady() {
+            document.addEventListener("online", reconnected, false);
+        }
+        function reconnected() {
+            app.tweets.storage.sync.incremental();
+        }
     });
 })();

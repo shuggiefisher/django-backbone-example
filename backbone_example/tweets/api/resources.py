@@ -129,6 +129,7 @@ class TweetResource(ModelResource):
 #        readonly_fields = ['timestamp'] don't use this because value will be ignored anyway
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'delete', 'put']
+        always_return_data = True  # helps integration with backbone which respects a response on POSTs
 
 #    @lazy
     def _users_with_perms(self, object):

@@ -7,8 +7,9 @@ from mptt.models import MPTTModel, TreeManyToManyField
 
 class Tweet(models.Model):
     message = models.CharField(max_length=140)
-    timestamp = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey('auth.User', null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     type = models.CharField(max_length=30, null=True, blank=True)
 #    parents = TreeManyToManyField('self', null=True, blank=True, related_name='children')
     parents = models.ManyToManyField('self', null=True, blank=True, related_name='children')
