@@ -19,6 +19,16 @@ everyone = Group.objects.get(pk=settings.EVERYONE_GROUP_ID)
 anonymous_user = User.objects.get(pk=settings.ANONYMOUS_USER_ID)
 
 
+class InterlistAuthorization(Authorization):
+    def is_authorized(self, request, object=None):
+        if request.user.is_anonymous() and request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            raise ImmediateHttpResponse(
+                response=http.HttpUnauthorized("Users must connect to sync their changes to the server")
+            )
+        else:
+            return True
+
+
 class TweetResource(ModelResource):
     created_by = fields.ForeignKey(UserResource, 'created_by', null=True)
     can_view = fields.ListField()
@@ -125,7 +135,7 @@ class TweetResource(ModelResource):
 
     class Meta:
         queryset = Tweet.objects.all()  # this is ignored by get_object_list() above
-        authorization = Authorization()
+        authorization = InterlistAuthorization()
 #        readonly_fields = ['timestamp'] don't use this because value will be ignored anyway
         list_allowed_methods = ['get', 'post']
         detail_allowed_methods = ['get', 'delete', 'put']
