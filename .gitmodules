@@ -1,0 +1,3 @@
+[submodule "backbone_example/libs/phonegap"]
+	path = backbone_example/libs/phonegap
+	url = git://github.com/phonegap/phonegap.git

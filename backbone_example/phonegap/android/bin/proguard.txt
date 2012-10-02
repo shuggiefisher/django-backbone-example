@@ -1,0 +1,3 @@
+# view AndroidManifest.xml #generated:51
+-keep class co.interlist.interlist { <init>(...); }
+
