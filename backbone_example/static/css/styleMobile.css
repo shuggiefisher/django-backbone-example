@@ -1,0 +1,88 @@
+#tweets {
+  margin: 0 2em;
+  border-top: 1px solid #ccc;
+}
+
+#app li {
+  font-size: 14px;
+  color: #333;
+  padding: 0px;
+}
+
+#input {
+  padding: 1em 2em;
+}
+
+#input strong {
+  display: block;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+#input #message {
+  margin-top: .5em;
+  width: 100%;
+  display: block;
+  border: #ccc 1px solid;
+}
+
+li #input {
+  display: block;
+  font-size: 1.25em;
+  color: #333;
+  background-color: #eee;
+  padding: .25em;
+  margin: .25em 0;
+}
+
+li input.edit {
+    display: none;
+    margin: 0px;
+    border-radius: 0 0 0 0;
+    background-color: #eee;
+}
+
+li:first-of-type input.edit {
+  border-radius: 0.6em 0.6em 0 0;
+}
+
+li:last-of-type input.edit {
+  border-radius: 0 0 0.6em 0.6em;
+}
+
+#app li label {
+  word-break: break-word;
+  padding: 15px;
+  display: block;
+  line-height: 1.2;
+  -webkit-transition: color 0.4s;
+  -moz-transition: color 0.4s;
+  -ms-transition: color 0.4s;
+  -o-transition: color 0.4s;
+  transition: color 0.4s;
+}
+
+#app li.editing {
+  border-bottom: none;
+  padding: 0;
+}
+
+#app li.editing .edit {
+  display: block;
+  padding: 0px;
+  padding: 15px;
+  font-size: 14px;
+}
+
+#app li.editing .message {
+  display: none;
+}
+
+#app input.edit::-webkit-input-placeholder {
+  font-style: italic;
+}
+
+#app input.edit:-moz-placeholder {
+  font-style: italic;
+  color: #a9a9a9;
+}

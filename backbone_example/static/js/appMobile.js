@@ -1,50 +1,69 @@
 var ENTER_KEY = 13;
 
 (function(){
-    window.Tweet = Backbone.Model.extend({
-        urlRoot: TWEET_API
-    });
 
-    window.Tweets = Backbone.Collection.extend({
-        urlRoot: TWEET_API,
-        model: Tweet,
-
-        maybeFetch: function(options){
-            // Helper function to fetch only if this collection has not been fetched before.
-            if(this._fetched){
-                // If this has already been fetched, call the success, if it exists
-                options.success && options.success();
-                return;
-            }
-
-            // when the original success function completes mark this collection as fetched
-            var self = this,
-                successWrapper = function(success){
-                    return function(){
-                        self._fetched = true;
-                        success && success.apply(this, arguments);
-                    };
-                };
-            options.success = successWrapper(options.success);
-            this.fetch(options);
+    window.TastypieModel = Backbone.Model.extend({
+        base_url: function() {
+          var temp_url = Backbone.Model.prototype.url.call(this);
+          return (temp_url.charAt(temp_url.length - 1) == '/' ? temp_url : temp_url+'/');
         },
 
-        getOrFetch: function(id, options){
-            // Helper function to use this collection as a cache for models on the server
-            var model = this.get(id);
+        url: function() {
+          return this.base_url();
+        }
+    });
 
-            if(model){
-                options.success && options.success(model);
-                return;
-            }
+    window.TastypieCollection = Backbone.Collection.extend({
+        parse: function(response) {
+            this.recent_meta = response.meta || {};
+            return response.objects || response;
+        }
+    });
 
-            model = new Tweet({
-                resource_uri: id
+    window.Me = TastypieModel.extend({
+        url: ME_RESOURCE,
+
+        initialize: function() {
+            this.bind('change', function() {
+                app.connect.render(this);
             });
+        }
+    });
 
-            model.fetch(options);
+    window.Mes = TastypieCollection.extend({
+        // how should I deal with a singleton collection?
+
+        url: ME_RESOURCE,
+        model: Me,
+
+        // set this model to read only - no point, js cannot be trusted anyway
+
+        initialize: function() {
+            this.storage = new Offline.Storage('me', this, {autoPush: false});
         }
 
+    });
+
+    window.ConnectView = Backbone.View.extend({
+        el: "#connect",
+
+        render: function(me) {
+            $(this.el).html(JST.connect(me.toJSON()));
+            return this;
+        }
+    });
+
+    window.Tweet = TastypieModel.extend({
+        url: TWEET_RESOURCE
+    });
+
+    window.Tweets = TastypieCollection.extend({
+        url: TWEET_RESOURCE,
+        model: Tweet,
+
+        initialize: function() {
+            this.storage = new Offline.Storage('interlists', this, {autoPush: true});
+        }
 
     });
 
@@ -54,7 +73,7 @@ var ENTER_KEY = 13;
 
         events: {
             'click .permalink': 'navigate',
-            'click .destroy': 'clear',
+            'taphold .message': 'clear',
             'dblclick .message': 'edit',
             'keypress .edit': 'updateOnEnter',
             'blur .edit': 'close'
@@ -99,7 +118,7 @@ var ENTER_KEY = 13;
 		},
 
         render: function(){
-            $(this.el).html(JST.tweetTemplateMobile(this.model.toJSON())).trigger('create');
+            $(this.el).html(JST.tweetTemplateMobile(this.model.toJSON()));
             this.input = this.$('.edit');
             return this;
         }
@@ -152,7 +171,7 @@ var ENTER_KEY = 13;
         initialize: function(){
             _.bindAll(this, 'addOne', 'addAll', 'deleteOne');
 
-            this.collection.bind('add', this.addOne);
+            this.collection.bind('add', this.addJustOne, this);
             this.collection.bind('reset', this.addAll, this);
             this.collection.bind('remove', this.deleteOne, this);
             this.views = [];
@@ -161,6 +180,11 @@ var ENTER_KEY = 13;
         addAll: function(){
             this.views = [];
             this.collection.each(this.addOne);
+        },
+
+        addJustOne: function(tweet) {
+            this.addOne(tweet);
+            this.$el.listview('refresh'); // get jqm to refresh styling to the list
         },
 
         addOne: function(tweet){
@@ -202,7 +226,7 @@ var ENTER_KEY = 13;
                 collection: this.collection,
                 el: this.$('#input')
             });
-            app.list.el.trigger('create'); // once all are added tell jquery mobile to style the whole page
+            app.list.$el.trigger('create'); // once all are added tell jquery mobile to style the whole page
         }
     });
 
@@ -227,6 +251,10 @@ var ENTER_KEY = 13;
         window.app = window.app || {};
         app.router = new Router();
         app.tweets = new Tweets();
+        app.mes = new Mes();
+        app.connect = new ConnectView({
+            collection: app.mes
+        });
         app.list = new ListApp({
             el: $("#app"),
             collection: app.tweets
@@ -235,17 +263,23 @@ var ENTER_KEY = 13;
             el: $("#app")
         });
         app.router.bind('route:list', function(){
-            app.tweets.maybeFetch({
-                success: _.bind(app.list.render, app.list)
+            // load me resource from local storage
+            app.mes.fetch({
+                local: true
             });
-        });
-        app.router.bind('route:detail', function(id){
-            app.tweets.getOrFetch(app.tweets.urlRoot + id + '/', {
-                success: function(model){
-                    app.detail.model = model;
-                    app.detail.render();
+
+            app.tweets.fetch({
+                local: true,
+                success: function(tweets) {
+                    app.list.render(tweets);
                 }
             });
+
+            // update me resource from server
+            app.mes.storage.sync.full();
+            // try and update elements in localstorage
+            app.tweets.storage.sync.incremental();
+
         });
 
         app.list.bind('navigate', app.router.navigate_to, app.router);
@@ -254,5 +288,30 @@ var ENTER_KEY = 13;
             pushState: true,
             silent: app.loaded
         });
+
+        document.addEventListener("deviceready", onDeviceReady, false);
+        function onDeviceReady() {
+            document.addEventListener("online", reconnected, false);
+        }
+        function reconnected() {
+            app.mes.storage.sync.full();
+            app.tweets.storage.sync.incremental();
+        }
+
+        // Check if a new cache is available on page load.
+        window.addEventListener('load', function(e) {
+
+            window.applicationCache.addEventListener('updateready', function(e) {
+                if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+                    // Browser downloaded a new app cache.
+                    // Swap it in and reload the page to get the new hotness.
+                    window.applicationCache.swapCache();
+                    window.location.reload();  // don't ask if they want to reload - any changes should be in localstorage and will be synced on next page load
+                } else {
+                  // Manifest didn't changed. Nothing new to server.
+                }
+            }, false);
+
+        }, false);
     });
 })();

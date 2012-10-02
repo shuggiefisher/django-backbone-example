@@ -105,6 +105,7 @@ INSTALLED_APPS = (
     'guardian',
     'django_extensions',
     'social_auth',
+    'tastypie',
     'mptt',
     'pipeline',
     'manifesto',
@@ -163,6 +164,8 @@ TWITTER_EXTRA_DATA = [
     ('protected', 'protected')
 ]
 
+SESSION_COOKIE_AGE = 9999999999999  # never expire the session, user must manually log out
+
 
 # PIPELINE CONFIG
 
@@ -177,7 +180,7 @@ PIPELINE_TEMPLATE_FUNC = 'Handlebars.compile'
 PIPELINE_CSS = {
     'mobile': {
         'source_filenames': (
-          'css/style.css',
+          'css/styleMobile.css',
           'css/jquery.mobile-1.1.1.css',
         ),
         'output_filename': 'css/mobile.css',
@@ -194,10 +197,10 @@ PIPELINE_JS = {
         'source_filenames': (
             'js/jquery-1.6.4.js',
             'js/jquery.mobile-1.1.1.js',
-            'js/underscore-min.js',
-            'js/backbone-min.js',
-            'js/backbone-tastypie.js',
+            'js/underscore-1.4.0.js',
+            'js/backbone-0.9.2.js',
             'js/handlebars-1.0.rc.1.js',
+            'js/backbone_offline.js',
             'js/appMobile.js',
             'mustache/*.mustache'
         ),

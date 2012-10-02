@@ -13,7 +13,8 @@
         {% endblock %}
 
         <script>
-            TWEET_API = "{% url api_dispatch_list api_name="v1" resource_name="tweet" %}";
+            TWEET_RESOURCE = "{% url api_dispatch_list api_name="v1" resource_name="tweet" %}";
+            ME_RESOURCE = "{% url api_dispatch_list api_name="v1" resource_name="me" %}";
             {% if data %}
                 app = {loaded: true};
             {% endif %}
@@ -26,7 +27,7 @@
             {% if users_and_groups %}
                 window.JST['usersAndGroupsSelect'] = Handlebars.compile('\
                     <select multiple="multiple" class="perms"{% verbatim %} data-perm-type="{{perm}}"{% endverbatim %}>\
-                        {% mustache "usersAndGroupsSelect" users_and_groups %}\
+                        {% mustache "usersAndGroupsSelectOptions" users_and_groups %}\
                     </select>\
                 ');
             {% endif %}
@@ -40,6 +41,7 @@
         <div data-role="page">
 
             <div data-role="header">
+                <span id="connect" style="float:right"></span>
                 <h1>My Title</h1>
             </div><!-- /header -->
 
