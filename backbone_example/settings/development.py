@@ -1,0 +1,19 @@
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+PIPELINE = not DEBUG
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'test.db',
+    }
+}
+
+TWITTER_CONSUMER_KEY         = '7O7YUzfuIYUBm7zA6K1xQA'
+TWITTER_CONSUMER_SECRET      = 'aYl5l930PGx1N97YxUreJH1YT1jxZAGAhCCCNT1g'
+
+TWITTER_ACCESS_TOKEN         = '331027719-89VXUFOHMYcSu0rUlaNuquY9O48jFgcyNy4a6QnS'
+TWITTER_ACCESS_TOKEN_SECRET  = '75vPhfdzRwqMdnBRfofkCpMIJAnh7dvf7Fx32eDRg8'
+
+PORT = 8880
+HOSTNAME = 'localhost'

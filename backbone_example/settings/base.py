@@ -3,32 +3,22 @@ import os
 
 PROJECT_ROOT = os.path.dirname(__file__)
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'backbone_example.db'
-    }
-}
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'Europe/London'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-gb'
 
 SITE_ID = 1
 
@@ -57,7 +47,7 @@ STATIC_URL = "/static/"
 ADMIN_MEDIA_PREFIX = '/media/admin/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '637i_o@27q89j^-gm+i!5g4#&pwo%)^^m&2g@4o^a8f92l#klq'
+SECRET_KEY = 'd%59+7*uu)2865o1dljwx6n*_&g*jh_d9^j(t9=l!g(vvydm5a'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -144,12 +134,6 @@ LOGIN_URL          = '/login-form/'
 LOGIN_REDIRECT_URL = '/logged-in/'
 LOGIN_ERROR_URL    = '/login-error/'
 
-TWITTER_CONSUMER_KEY         = '7O7YUzfuIYUBm7zA6K1xQA'
-TWITTER_CONSUMER_SECRET      = 'aYl5l930PGx1N97YxUreJH1YT1jxZAGAhCCCNT1g'
-
-TWITTER_ACCESS_TOKEN         = '331027719-89VXUFOHMYcSu0rUlaNuquY9O48jFgcyNy4a6QnS'
-TWITTER_ACCESS_TOKEN_SECRET  = '75vPhfdzRwqMdnBRfofkCpMIJAnh7dvf7Fx32eDRg8'
-
 TWITTER_EXTRA_DATA = [
     ('screen_name', 'screen_name'),
     ('profile_image_url', 'profile_image_url'),
@@ -168,8 +152,6 @@ SESSION_COOKIE_AGE = 99999999999  # expire the session in 5181, otherwise the us
 
 
 # PIPELINE CONFIG
-
-PIPELINE = not DEBUG
 
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 PIPELINE_STORAGE = 'pipeline.storage.PipelineFinderStorage'
@@ -208,3 +190,8 @@ PIPELINE_JS = {
         'manifest': False,
     }
 }
+
+try:
+    from localsettings import *
+except ImportError:
+    pass
