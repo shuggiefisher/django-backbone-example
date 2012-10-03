@@ -164,7 +164,7 @@ TWITTER_EXTRA_DATA = [
     ('protected', 'protected')
 ]
 
-SESSION_COOKIE_AGE = 9999999999999  # never expire the session, user must manually log out
+SESSION_COOKIE_AGE = 99999999999  # expire the session in 5181, otherwise the user must manually log out
 
 
 # PIPELINE CONFIG

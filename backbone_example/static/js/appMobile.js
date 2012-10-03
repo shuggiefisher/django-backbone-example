@@ -24,9 +24,7 @@ var ENTER_KEY = 13;
         url: ME_RESOURCE,
 
         initialize: function() {
-            this.bind('change', function() {
-                app.connect.render(this);
-            });
+            this.bind('change:registered', app.tweets.updateElementsFromServer, app.tweets);
         }
     });
 
@@ -40,6 +38,44 @@ var ENTER_KEY = 13;
 
         initialize: function() {
             this.storage = new Offline.Storage('me', this, {autoPush: false});
+
+            this.bind('reset', this.addOne, this);
+
+            $(document).ajaxError(function(e, jqxhr, settings, exception) {
+                // listen for signs the user is not connected
+                if (jqxhr.responseText === "Users must connect to sync their changes to the server") {
+
+                    // do something to highlight the user is not connected
+
+                    app.mes.throttledSync();
+                }
+            });
+        },
+
+        addOne: function(){
+            app.me = this.models[0];
+            this.views = [];
+            var view = new ConnectView({
+                model: app.me
+            });
+            view.render();
+            this.views.push(view);
+        },
+
+        blockSync: false,
+
+        throttledSync: function() {
+            // only update the /me resource at most once every 30s
+            if (this.blockSync === false) {
+                var _this = this;
+                this.storage.sync.full({
+                    silent: true,
+                    success: function() {
+                        _this.blockSync = true;
+                        setTimeout(function(){ _this.blockSync = false;}, 30000);
+                    }
+                });
+            }
         }
 
     });
@@ -47,8 +83,12 @@ var ENTER_KEY = 13;
     window.ConnectView = Backbone.View.extend({
         el: "#connect",
 
-        render: function(me) {
-            $(this.el).html(JST.connect(me.toJSON()));
+        initialize: function() {
+            this.model.bind('change:registered', this.render, this);
+        },
+
+        render: function() {
+            $(this.el).html(JST.connect(this.model.toJSON()));
             return this;
         }
     });
@@ -63,6 +103,17 @@ var ENTER_KEY = 13;
 
         initialize: function() {
             this.storage = new Offline.Storage('interlists', this, {autoPush: true});
+        },
+
+        updateElementsFromServer: function() {
+            if (app.me.attributes.registered === true) {
+                // pull and update server with changes from localstorage
+                this.storage.sync.incremental();
+            }
+            else {
+                // read-only mode, just pull new elements
+                this.storage.sync.pull();
+            }
         }
 
     });
@@ -248,13 +299,11 @@ var ENTER_KEY = 13;
     });
 
     $(function(){
+
         window.app = window.app || {};
         app.router = new Router();
         app.tweets = new Tweets();
         app.mes = new Mes();
-        app.connect = new ConnectView({
-            collection: app.mes
-        });
         app.list = new ListApp({
             el: $("#app"),
             collection: app.tweets
@@ -276,10 +325,7 @@ var ENTER_KEY = 13;
             });
 
             // update me resource from server
-            app.mes.storage.sync.full();
-            // try and update elements in localstorage
-            app.tweets.storage.sync.incremental();
-
+            updateMeAndSync();
         });
 
         app.list.bind('navigate', app.router.navigate_to, app.router);
@@ -294,8 +340,14 @@ var ENTER_KEY = 13;
             document.addEventListener("online", reconnected, false);
         }
         function reconnected() {
-            app.mes.storage.sync.full();
-            app.tweets.storage.sync.incremental();
+            updateMeAndSync();
+        }
+
+        function updateMeAndSync() {
+            // will this get called twice on page load?
+            app.mes.storage.sync.full({
+                silent: true
+            });
         }
 
         // Check if a new cache is available on page load.

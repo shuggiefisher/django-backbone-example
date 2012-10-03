@@ -29,7 +29,7 @@ class GroupResource(ModelResource):
 
 class MeResource(ModelResource):
     api_key = fields.CharField()
-    connected = fields.BooleanField()
+    registered = fields.BooleanField()
 
     def override_urls(self):
         """
@@ -52,7 +52,7 @@ class MeResource(ModelResource):
     def dehydrate_api_key(self, bundle):
         return bundle.obj.api_key.key
 
-    def dehydrate_connected(self, bundle):
+    def dehydrate_registered(self, bundle):
         if bundle.obj.pk == settings.ANONYMOUS_USER_ID:
             return False
         else:
